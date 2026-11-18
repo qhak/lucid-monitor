@@ -1,0 +1,38 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "lucid-monitor",
+  "main": "server/index.ts",
+  "compatibility_date": "2026-10-01",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "ratelimits": [
+    { "name": "API_LIMIT", "namespace_id": "40101", "simple": { "limit": 120, "period": 60 } },
+    { "name": "AUTH_LIMIT", "namespace_id": "40102", "simple": { "limit": 20, "period": 60 } }
+  ],
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/api/*", "/__scheduled"]
+  },
+  "d1_databases": [{
+    "binding": "DB",
+    "database_name": "lucid-monitor",
+    "database_id": "00000000-0000-0000-0000-000000000000",
+    "migrations_dir": "migrations"
+  }],
+  "durable_objects": {
+    "bindings": [{ "name": "SCHEDULER", "class_name": "Scheduler" }]
+  },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["Scheduler"] }],
+  "triggers": { "crons": ["* * * * *"] },
+  "queues": {
+    "producers": [
+      { "binding": "CHECK_QUEUE", "queue": "lucid-checks" },
+      { "binding": "ALERT_QUEUE", "queue": "lucid-alerts" }
+    ],
+    "consumers": [
+      { "queue": "lucid-checks", "max_batch_size": 2, "max_batch_timeout": 2, "max_concurrency": 8, "max_retries": 4, "dead_letter_queue": "lucid-checks-dlq" },
+      { "queue": "lucid-alerts", "max_batch_size": 12, "max_batch_timeout": 2, "max_concurrency": 4, "max_retries": 4, "dead_letter_queue": "lucid-alerts-dlq" }
+    ]
+  },
+  "observability": { "enabled": true }
+}

@@ -1,0 +1,8 @@
+AUTH_SECRET=
+AUTH_URL=http://localhost:8787
+REGISTRATION_KEY=
+ALERT_ENCRYPTION_KEY=
+OUTBOUND_HOSTS=example.com
+# EMAIL_FROM=alerts@example.com
+# TLS_METADATA_URL=https://your-certificate-inspector.example/expiry
+# TLS_METADATA_TOKEN=
